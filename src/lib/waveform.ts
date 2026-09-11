@@ -1,11 +1,13 @@
-import type { Bit, Reg, HistoryEntry } from "../types/register";
+import type { Bit, HistoryEntry, Reg } from "../types/register";
 
 export const COL = 44;
 export const ROW = 34;
 export const PAD = 12;
 export const LABEL_W = 48;
-export const ROW_LABELS = ["CLK", "D", "Q0", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"] as const;
-export const ROW_COUNT = ROW_LABELS.length;
+
+// Índices de fila fijos: CLK=0, D=1, Q0..Q3=2..5, SO=6 (SO solo se dibuja en PISO).
+export const ROW_LABELS_BASE = ["CLK", "D", "Q0", "Q1", "Q2", "Q3"] as const;
+export const SO_ROW_LABEL = "SO";
 
 const HIGH_OFF = 6;
 const LOW_OFF = ROW - 6;
@@ -15,8 +17,8 @@ export interface WaveColumn {
   isPulse: boolean;
   clkLow: string;
   clkHigh: string | null;
-  rowPaths: string[]; // [D, Q0..Q7], local coords (0..COL)
-  levels: Bit[]; // [D, Q0..Q7]
+  rowPaths: string[]; // [D, Q0..Q3, SO], local coords (0..COL)
+  levels: Bit[]; // [D, Q0..Q3, SO]
 }
 
 export function rowY(rowIndex: number): number {
@@ -29,6 +31,10 @@ export function highY(rowIndex: number): number {
 
 export function lowY(rowIndex: number): number {
   return rowY(rowIndex) + LOW_OFF;
+}
+
+export function edgeX(columnIndex: number): number {
+  return columnIndex * COL + COL / 2;
 }
 
 function levelSegment(prev: Bit | null, level: Bit, rowIndex: number): string {
@@ -53,20 +59,24 @@ function clkSegments(isPulse: boolean): { low: string; high: string | null } {
   };
 }
 
-const ZERO_REG: Reg = [0, 0, 0, 0, 0, 0, 0, 0];
+const ZERO_REG: Reg = [0, 0, 0, 0];
 
 export function buildColumns(history: HistoryEntry[]): WaveColumn[] {
   const columns: WaveColumn[] = [];
   let prevD: Bit = 0;
   let prevQ: Reg = ZERO_REG;
+  let prevSo: Bit = 0;
 
   for (let i = 0; i <= history.length; i++) {
     const isPulse = i > 0;
-    const d: Bit = isPulse ? history[i - 1].data : 0;
-    const q: Reg = isPulse ? history[i - 1].reg : ZERO_REG;
+    const entry = isPulse ? history[i - 1] : null;
+    const d: Bit = entry ? entry.dIn : 0;
+    const q: Reg = entry ? entry.reg : ZERO_REG;
+    const so: Bit = entry?.serialOut ?? 0;
 
     const dPath = levelSegment(i === 0 ? null : prevD, d, 1);
     const qPaths = q.map((bit, k) => levelSegment(i === 0 ? null : prevQ[k], bit, 2 + k));
+    const soPath = levelSegment(i === 0 ? null : prevSo, so, 6);
     const clk = clkSegments(isPulse);
 
     columns.push({
@@ -74,12 +84,13 @@ export function buildColumns(history: HistoryEntry[]): WaveColumn[] {
       isPulse,
       clkLow: clk.low,
       clkHigh: clk.high,
-      rowPaths: [dPath, ...qPaths],
-      levels: [d, ...q],
+      rowPaths: [dPath, ...qPaths, soPath],
+      levels: [d, ...q, so],
     });
 
     prevD = d;
     prevQ = q;
+    prevSo = so;
   }
 
   return columns;

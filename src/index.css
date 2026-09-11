@@ -54,15 +54,3 @@ input[type="range"].range-slider::-moz-range-track {
   border-radius: 9999px;
   background: transparent;
 }
-
-/* Corriente fluyendo por un cable activo */
-@keyframes wire-flow {
-  to { stroke-dashoffset: -12; }
-}
-.wire-flow {
-  stroke-dasharray: 6 6;
-  animation: wire-flow 700ms linear infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .wire-flow { animation: none; }
-}

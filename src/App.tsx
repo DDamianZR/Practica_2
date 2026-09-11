@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { Controls } from "./components/Controls";
+import { useAutoRun } from "./lib/clock";
 
 function Panel({ title, children }: { title: string; children?: ReactNode }) {
   return (
@@ -10,13 +12,11 @@ function Panel({ title, children }: { title: string; children?: ReactNode }) {
 }
 
 export default function App() {
+  useAutoRun();
+
   return (
     <div className="flex min-h-full flex-col gap-4 p-4">
-      <header className="rounded-2xl border border-line bg-panel p-4">
-        <h1 className="font-mono text-sm uppercase tracking-widest text-text">
-          SIPO · 8 bits
-        </h1>
-      </header>
+      <Controls />
 
       <main className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Panel title="Circuit Board" />

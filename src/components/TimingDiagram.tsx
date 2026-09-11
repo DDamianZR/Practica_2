@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useRegisterStore } from "../store/registerStore";
 import {
   buildColumns,
@@ -17,6 +17,7 @@ const Q_ROW_STROKE = ["stroke-muted", "stroke-hi2"] as const;
 
 export function TimingDiagram() {
   const history = useRegisterStore((s) => s.history);
+  const prefersReducedMotion = useReducedMotion();
   const columns = useMemo(() => buildColumns(history), [history]);
   const numColumns = columns.length;
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -69,7 +70,7 @@ export function TimingDiagram() {
           {columns.map((col) => (
             <motion.g
               key={col.index}
-              initial={col.index === numColumns - 1 ? { opacity: 0, x: col.index * COL + 10 } : false}
+              initial={!prefersReducedMotion && col.index === numColumns - 1 ? { opacity: 0, x: col.index * COL + 10 } : false}
               animate={{ opacity: 1, x: col.index * COL }}
               transition={{ duration: 0.18, ease: "easeOut" }}
             >

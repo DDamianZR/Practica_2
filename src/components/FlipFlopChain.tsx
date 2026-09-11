@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import clsx from "clsx";
 import { useShallow } from "zustand/react/shallow";
 import { useRegisterStore } from "../store/registerStore";
@@ -135,6 +135,7 @@ function FlipFlop({ index, value }: { index: number; value: Bit }) {
 
 export function FlipFlopChain() {
   const [cycle, reg, data] = useRegisterStore(useShallow((s) => [s.cycle, s.reg, s.data]));
+  const prefersReducedMotion = useReducedMotion();
 
   const chipCount = 4;
   const chainRight = ffX(7) + FF_W + 40;
@@ -212,7 +213,7 @@ export function FlipFlopChain() {
         ))}
 
         {/* propagation particles */}
-        {cycle > 0 && (
+        {cycle > 0 && !prefersReducedMotion && (
           <g key={`particles-${cycle}`}>
             {Array.from({ length: 8 }, (_, k) => {
               const from = k === 0 ? { x: D_IN_X, y: CHAIN_Y + 20 } : qAnchor(k - 1);

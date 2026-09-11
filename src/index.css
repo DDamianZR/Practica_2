@@ -1,0 +1,68 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body {
+  @apply bg-bg text-text font-sans antialiased;
+  background-image:
+    radial-gradient(1200px 600px at 15% -10%, rgba(34,211,238,.08), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(52,211,153,.06), transparent 60%);
+}
+
+/* Foco accesible */
+:focus-visible { outline: 2px solid #22d3ee; outline-offset: 2px; border-radius: 4px; }
+
+/* Scrollbar sutil */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #1e2733; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #2b3644; }
+
+/* Slider BPM */
+input[type="range"].range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #22d3ee, #334155);
+  outline: none;
+}
+input[type="range"].range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #22d3ee;
+  box-shadow: 0 0 8px rgba(34, 211, 238, .8);
+  cursor: pointer;
+  border: 2px solid #07090c;
+}
+input[type="range"].range-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #22d3ee;
+  box-shadow: 0 0 8px rgba(34, 211, 238, .8);
+  cursor: pointer;
+  box-sizing: border-box;
+  border: 2px solid #07090c;
+}
+input[type="range"].range-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+/* Corriente fluyendo por un cable activo */
+@keyframes wire-flow {
+  to { stroke-dashoffset: -12; }
+}
+.wire-flow {
+  stroke-dasharray: 6 6;
+  animation: wire-flow 700ms linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wire-flow { animation: none; }
+}

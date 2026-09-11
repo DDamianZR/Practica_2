@@ -94,7 +94,7 @@ function Header() {
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-panel p-4">
       <h1 className="font-mono text-sm uppercase tracking-widest text-text">
-        Registro de Corrimiento <span className="text-muted">·</span> 4 bits
+        Registro de Corrimiento <span className="text-muted">·</span> 8 bits
       </h1>
       <div className="flex items-center gap-3">
         <ModeSelector />

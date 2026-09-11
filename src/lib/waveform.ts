@@ -5,8 +5,19 @@ export const ROW = 34;
 export const PAD = 12;
 export const LABEL_W = 48;
 
-// Índices de fila fijos: CLK=0, D=1, Q0..Q3=2..5, SO=6 (SO solo se dibuja en PISO).
-export const ROW_LABELS_BASE = ["CLK", "D", "Q0", "Q1", "Q2", "Q3"] as const;
+// Índices de fila fijos: CLK=0, D=1, Q0..Q7=2..9, SO=10 (SO solo se dibuja en PISO).
+export const ROW_LABELS_BASE = [
+  "CLK",
+  "D",
+  "Q0",
+  "Q1",
+  "Q2",
+  "Q3",
+  "Q4",
+  "Q5",
+  "Q6",
+  "Q7",
+] as const;
 export const SO_ROW_LABEL = "SO";
 
 const HIGH_OFF = 6;
@@ -17,8 +28,8 @@ export interface WaveColumn {
   isPulse: boolean;
   clkLow: string;
   clkHigh: string | null;
-  rowPaths: string[]; // [D, Q0..Q3, SO], local coords (0..COL)
-  levels: Bit[]; // [D, Q0..Q3, SO]
+  rowPaths: string[]; // [D, Q0..Q7, SO], local coords (0..COL)
+  levels: Bit[]; // [D, Q0..Q7, SO]
 }
 
 export function rowY(rowIndex: number): number {
@@ -59,7 +70,7 @@ function clkSegments(isPulse: boolean): { low: string; high: string | null } {
   };
 }
 
-const ZERO_REG: Reg = [0, 0, 0, 0];
+const ZERO_REG: Reg = [0, 0, 0, 0, 0, 0, 0, 0];
 
 export function buildColumns(history: HistoryEntry[]): WaveColumn[] {
   const columns: WaveColumn[] = [];
@@ -76,7 +87,7 @@ export function buildColumns(history: HistoryEntry[]): WaveColumn[] {
 
     const dPath = levelSegment(i === 0 ? null : prevD, d, 1);
     const qPaths = q.map((bit, k) => levelSegment(i === 0 ? null : prevQ[k], bit, 2 + k));
-    const soPath = levelSegment(i === 0 ? null : prevSo, so, 6);
+    const soPath = levelSegment(i === 0 ? null : prevSo, so, 10);
     const clk = clkSegments(isPulse);
 
     columns.push({

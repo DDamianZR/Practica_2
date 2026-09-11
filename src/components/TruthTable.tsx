@@ -4,7 +4,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useRegisterStore } from "../store/registerStore";
 import type { Bit, HistoryEntry, Mode, Reg } from "../types/register";
 
-const EMPTY_REG: Reg = [0, 0, 0, 0];
+const EMPTY_REG: Reg = [0, 0, 0, 0, 0, 0, 0, 0];
 
 interface CharacteristicRow {
   clr: string;
@@ -22,9 +22,9 @@ const CHARACTERISTIC_ROWS: CharacteristicRow[] = [
 ];
 
 const MODE_DEFINITIONS: Record<Mode, string> = {
-  SIPO: "Entrada serie por D0: cada CLK desplaza el registro un lugar hacia Q3, metiendo el bit del DIP D0 por Q0.",
-  PISO: "El primer CLK carga el DIP completo (D0..D3) en paralelo. Los siguientes CLK desplazan Q3 hacia la salida serie (SO), metiendo 0 por Q0.",
-  PIPO: "Cada CLK copia el DIP completo (D0..D3) directamente a Q0..Q3, sin corrimiento.",
+  SIPO: "Entrada serie por D0: cada CLK desplaza el registro un lugar a la derecha (Q7<-Q6..Q0<-D0).",
+  PISO: "El primer CLK carga el DIP completo (D0..D7) en paralelo. Los siguientes CLK desplazan a la derecha expulsando el bit por Q7 (SO) y metiendo 0 por Q0.",
+  PIPO: "Cada CLK copia el DIP completo (D0..D7) directamente a Q0..Q7 en paralelo, sin corrimiento.",
 };
 
 function BitCell({ value }: { value: Bit }) {
@@ -147,22 +147,22 @@ function ModeLog() {
               {mode === "SIPO" && (
                 <>
                   <th scope="col" className="px-2 py-1.5 font-mono font-normal">D0</th>
-                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">Q0Q1Q2Q3 actual</th>
-                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">Q0Q1Q2Q3 siguiente</th>
+                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">Q0..Q7 actual</th>
+                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">Q0..Q7 siguiente</th>
                 </>
               )}
               {mode === "PISO" && (
                 <>
                   <th scope="col" className="px-2 py-1.5 font-mono font-normal">Op</th>
-                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">entrada</th>
-                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">Q0Q1Q2Q3</th>
-                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">SO</th>
+                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">D0..D7 entrada</th>
+                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">Q0..Q7</th>
+                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">SO (Q7)</th>
                 </>
               )}
               {mode === "PIPO" && (
                 <>
-                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">D0D1D2D3</th>
-                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">Q0Q1Q2Q3</th>
+                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">D0..D7</th>
+                  <th scope="col" className="px-2 py-1.5 font-mono font-normal">Q0..Q7</th>
                 </>
               )}
             </tr>

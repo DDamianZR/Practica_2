@@ -6,24 +6,24 @@ import { useRegisterStore } from "../store/registerStore";
 import { pulseWithSound, cycleModeWithSound } from "../lib/clock";
 import { CLK_PIN, CLR_PIN, DIP_PINS, LED_PINS, MODE_PIN } from "../lib/pinmap";
 
-const LED_X = (i: number) => 90 + i * 74;
+const LED_X = (i: number) => 70 + i * 50;
 const LED_Y = 40;
 const RAIL_Y = 100;
 const ARDUINO_X = 30;
 const ARDUINO_Y = 190;
-const ARDUINO_W = 860;
+const ARDUINO_W = 970;
 const ARDUINO_H = 168;
 const PIN_Y = ARDUINO_Y;
 
-const DIP_X = (i: number) => 470 + i * 62;
+const DIP_X = (i: number) => 490 + i * 44;
 const DIP_Y = 24;
-const CLK_X = 730;
+const CLK_X = 860;
 const CLK_Y = 34;
-const CLR_X = 774;
+const CLR_X = 902;
 const CLR_Y = 34;
-const MODE_X = 818;
+const MODE_X = 944;
 const MODE_Y = 34;
-const GND_PIN_X = 862;
+const GND_PIN_X = 986;
 
 function bow(x1: number, y1: number, x2: number, y2: number, lean: number): string {
   const midY = (y1 + y2) / 2;
@@ -79,7 +79,7 @@ export function CircuitBoard() {
   const setDip = useRegisterStore((s) => s.setDip);
   const [hovered, setHovered] = useState<string | null>(null);
 
-  const svgWidth = 920;
+  const svgWidth = 1030;
   const svgHeight = ARDUINO_Y + ARDUINO_H + 20;
 
   return (
@@ -90,7 +90,7 @@ export function CircuitBoard() {
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         style={{ minWidth: svgWidth }}
         role="img"
-        aria-label={`Vista de circuito. Arduino UNO en modo ${mode}, DIP=${dip.join("")}, LEDs Q0..Q3 = ${reg.join("")}`}
+        aria-label={`Vista de circuito. Arduino UNO en modo ${mode}, DIP=${dip.join("")}, LEDs Q0..Q7 = ${reg.join("")}`}
       >
         <defs>
           <filter id="ledGlow" x="-60%" y="-60%" width="220%" height="220%">
@@ -103,12 +103,12 @@ export function CircuitBoard() {
         </defs>
 
         {/* GND rail */}
-        <line x1={70} y1={RAIL_Y} x2={LED_X(3) + 20} y2={RAIL_Y} className="stroke-line" strokeWidth={1.5} />
-        <text x={40} y={RAIL_Y + 3} className="fill-muted" style={{ fontSize: 8, fontFamily: "monospace" }}>GND</text>
-        <SignalWire d={bow(LED_X(3) + 20, RAIL_Y, GND_PIN_X, PIN_Y, 40)} active={false} colorClass="stroke-line" />
+        <line x1={50} y1={RAIL_Y} x2={LED_X(7) + 20} y2={RAIL_Y} className="stroke-line" strokeWidth={1.5} />
+        <text x={26} y={RAIL_Y + 3} className="fill-muted" style={{ fontSize: 8, fontFamily: "monospace" }}>GND</text>
+        <SignalWire d={bow(LED_X(7) + 20, RAIL_Y, GND_PIN_X, PIN_Y, 30)} active={false} colorClass="stroke-line" />
 
         {/* LEDs + resistors + signal wires */}
-        {Array.from({ length: 4 }, (_, i) => {
+        {Array.from({ length: 8 }, (_, i) => {
           const x = LED_X(i);
           const lit = reg[i] === 1;
           const pinX = x;
@@ -120,10 +120,10 @@ export function CircuitBoard() {
             >
               <title>{`LED Q${i} · Arduino ${LED_PINS[i]} · estado ${reg[i]}`}</title>
 
-              <SignalWire d={bow(pinX, PIN_Y, x, LED_Y + 12, -14)} active={lit} colorClass="stroke-hi2" />
+              <SignalWire d={bow(pinX, PIN_Y, x, LED_Y + 12, -10)} active={lit} colorClass="stroke-hi2" />
 
               <path
-                d={`M ${x} ${LED_Y + 11} L ${x - 4} ${LED_Y + 17} L ${x + 4} ${LED_Y + 23} L ${x - 4} ${LED_Y + 29} L ${x + 4} ${LED_Y + 35} L ${x} ${RAIL_Y}`}
+                d={`M ${x} ${LED_Y + 11} L ${x - 3} ${LED_Y + 17} L ${x + 3} ${LED_Y + 23} L ${x - 3} ${LED_Y + 29} L ${x + 3} ${LED_Y + 35} L ${x} ${RAIL_Y}`}
                 fill="none"
                 className="stroke-muted"
                 strokeWidth={1.5}
@@ -132,14 +132,14 @@ export function CircuitBoard() {
               <circle
                 cx={x}
                 cy={LED_Y}
-                r={11}
+                r={10}
                 className={lit ? "fill-hi2" : "fill-lo"}
                 filter={lit ? "url(#ledGlow)" : undefined}
                 style={{ transition: "fill 120ms" }}
               />
-              <circle cx={x} cy={LED_Y} r={11} className="fill-none stroke-line" strokeWidth={1} />
+              <circle cx={x} cy={LED_Y} r={10} className="fill-none stroke-line" strokeWidth={1} />
 
-              <text x={x} y={LED_Y + 52} textAnchor="middle" className="fill-text" style={{ fontSize: 9, fontFamily: "monospace" }}>
+              <text x={x} y={LED_Y + 50} textAnchor="middle" className="fill-text" style={{ fontSize: 8.5, fontFamily: "monospace" }}>
                 Q{i}
               </text>
 
@@ -148,8 +148,8 @@ export function CircuitBoard() {
           );
         })}
 
-        {/* DIP switches (D0..D3) */}
-        {Array.from({ length: 4 }, (_, i) => {
+        {/* DIP switches (D0..D7) */}
+        {Array.from({ length: 8 }, (_, i) => {
           const x = DIP_X(i);
           const value = dip[i];
           const relevant = mode !== "SIPO" || i === 0;
@@ -162,7 +162,7 @@ export function CircuitBoard() {
             >
               <title>{`DIP D${i} · Arduino ${DIP_PINS[i]} · estado ${value}`}</title>
               <SignalWire d={bow(x + 8, DIP_Y + 26, x + 8, PIN_Y, 6)} active={value === 1} colorClass="stroke-data" />
-              <rect x={x} y={DIP_Y} width={22} height={26} rx={3} className="fill-panel2 stroke-line" strokeWidth={1} />
+              <rect x={x} y={DIP_Y} width={20} height={26} rx={3} className="fill-panel2 stroke-line" strokeWidth={1} />
               <g
                 role="switch"
                 aria-checked={value === 1}
@@ -177,9 +177,9 @@ export function CircuitBoard() {
                 }}
                 style={{ cursor: "pointer" }}
               >
-                <rect x={x + 3} y={DIP_Y + 3} width={16} height={20} rx={2} className="fill-bg stroke-line" strokeWidth={0.75} />
+                <rect x={x + 2} y={DIP_Y + 3} width={16} height={20} rx={2} className="fill-bg stroke-line" strokeWidth={0.75} />
                 <motion.rect
-                  x={x + 5}
+                  x={x + 4}
                   width={12}
                   height={9}
                   rx={1.5}
@@ -188,7 +188,7 @@ export function CircuitBoard() {
                   transition={{ type: "spring", stiffness: 500, damping: 32 }}
                 />
               </g>
-              <text x={x + 11} y={DIP_Y - 4} textAnchor="middle" className="fill-data" style={{ fontSize: 8, fontFamily: "monospace" }}>
+              <text x={x + 10} y={DIP_Y - 4} textAnchor="middle" className="fill-data" style={{ fontSize: 7.5, fontFamily: "monospace" }}>
                 D{i}
               </text>
               <PinLabel x={x + 8} y={PIN_Y} label={DIP_PINS[i]} />

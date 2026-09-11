@@ -10,8 +10,8 @@ function DipToggle({ index, active }: { index: number; active: boolean }) {
   const setDip = useRegisterStore((s) => s.setDip);
 
   return (
-    <div className={clsx("flex flex-col items-center gap-1.5 transition-opacity duration-200", !active && "opacity-40")}>
-      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">D{index} · {DIP_PINS[index]}</span>
+    <div className={clsx("flex flex-col items-center gap-1 transition-opacity duration-200", !active && "opacity-40")}>
+      <span className="font-mono text-[9px] uppercase tracking-wider text-muted">D{index} · {DIP_PINS[index]}</span>
       <button
         type="button"
         role="switch"
@@ -19,20 +19,20 @@ function DipToggle({ index, active }: { index: number; active: boolean }) {
         aria-label={`Interruptor DIP D${index}, pin ${DIP_PINS[index]}. Estado actual: ${value === 1 ? "encendido (1)" : "apagado (0)"}. Activar para cambiar.`}
         onClick={() => setDip(index, value === 1 ? 0 : 1)}
         className={clsx(
-          "relative h-8 w-14 rounded-full border transition-colors duration-200",
+          "relative h-7 w-12 rounded-full border transition-colors duration-200",
           value === 1 ? "border-hi2/60 bg-hi2/10" : "border-line bg-panel2",
         )}
       >
         <motion.span
-          animate={{ x: value === 1 ? 24 : 2 }}
+          animate={{ x: value === 1 ? 22 : 2 }}
           transition={{ type: "spring", stiffness: 500, damping: 32 }}
           className={clsx(
-            "absolute top-1 h-6 w-6 rounded-full",
+            "absolute top-1 h-5 w-5 rounded-full",
             value === 1 ? "bg-hi2 shadow-glow" : "bg-lo",
           )}
         />
       </button>
-      <span className="font-mono text-xs font-bold text-text">{value}</span>
+      <span className="font-mono text-[11px] font-bold text-text">{value}</span>
     </div>
   );
 }
@@ -42,9 +42,9 @@ function DipBank() {
 
   return (
     <div className="flex flex-col items-start gap-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">DIP (D0..D3)</span>
-      <div className="flex items-end gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
+      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">DIP (D0..D7)</span>
+      <div className="flex flex-wrap items-end gap-2.5">
+        {Array.from({ length: 8 }, (_, i) => (
           <DipToggle key={i} index={i} active={mode !== "SIPO" || i === 0} />
         ))}
       </div>
@@ -172,7 +172,7 @@ function AutoRunControls() {
 
 export function Controls() {
   return (
-    <div className="flex flex-wrap items-end gap-x-8 gap-y-4 rounded-2xl border border-line bg-panel p-4">
+    <div className="flex flex-wrap items-end gap-x-6 gap-y-4 rounded-2xl border border-line bg-panel p-4">
       <DipBank />
       <ClkButton />
       <ClrButton />

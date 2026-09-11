@@ -3,7 +3,16 @@ import { useRegisterStore } from "../store/registerStore";
 import { cycleModeWithSound, pulseWithSound } from "./clock";
 import type { Bit } from "../types/register";
 
-const DIP_KEYS: Record<string, number> = { "1": 0, "2": 1, "3": 2, "4": 3 };
+const DIP_KEYS: Record<string, number> = {
+  "1": 0,
+  "2": 1,
+  "3": 2,
+  "4": 3,
+  "5": 4,
+  "6": 5,
+  "7": 6,
+  "8": 7,
+};
 
 export function useShortcuts() {
   useEffect(() => {

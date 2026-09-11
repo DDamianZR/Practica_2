@@ -4,8 +4,8 @@ import { step } from "../lib/simulation";
 
 const HISTORY_CAP = 32;
 const SERIAL_CAP = 16;
-const EMPTY_REG: Reg = [0, 0, 0, 0];
-const EMPTY_DIP: Dip = [0, 0, 0, 0];
+const EMPTY_REG: Reg = [0, 0, 0, 0, 0, 0, 0, 0];
+const EMPTY_DIP: Dip = [0, 0, 0, 0, 0, 0, 0, 0];
 
 const MODE_ORDER: Mode[] = ["SIPO", "PISO", "PIPO"];
 

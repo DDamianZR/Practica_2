@@ -21,7 +21,7 @@ const SO_ROW_STROKE = ["stroke-muted", "stroke-hi"] as const;
 
 function rowStrokeClass(rowPathIndex: number, level: 0 | 1): string {
   if (rowPathIndex === 0) return D_ROW_STROKE[level];
-  if (rowPathIndex >= 1 && rowPathIndex <= 4) return Q_ROW_STROKE[level];
+  if (rowPathIndex >= 1 && rowPathIndex <= 8) return Q_ROW_STROKE[level];
   return SO_ROW_STROKE[level];
 }
 
@@ -37,7 +37,7 @@ export function TimingDiagram() {
   const showSo = mode === "PISO";
   const rowLabels = showSo ? [...ROW_LABELS_BASE, SO_ROW_LABEL] : ROW_LABELS_BASE;
   const rowCount = rowLabels.length;
-  const visibleRowPathCount = showSo ? 6 : 5; // D + Q0..Q3 (+ SO)
+  const visibleRowPathCount = showSo ? 10 : 9; // D + Q0..Q7 (+ SO)
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -48,7 +48,7 @@ export function TimingDiagram() {
   const svgWidth = numColumns * COL;
   const svgHeight = PAD * 2 + rowCount * ROW;
   const markerX = numColumns * COL;
-  const lastReg = history[history.length - 1]?.reg ?? [0, 0, 0, 0];
+  const lastReg = history[history.length - 1]?.reg ?? [0, 0, 0, 0, 0, 0, 0, 0];
 
   return (
     <div className="flex flex-col gap-3">
@@ -99,7 +99,7 @@ export function TimingDiagram() {
             style={{ width: svgWidth, height: svgHeight, maxWidth: "none" }}
             viewBox={`0 0 ${svgWidth} ${svgHeight}`}
             role="img"
-            aria-label={`Diagrama de tiempos, modo ${mode}, ${numColumns - 1} pulsos. Estado actual Q0..Q3 = ${lastReg.join("")}`}
+            aria-label={`Diagrama de tiempos, modo ${mode}, ${numColumns - 1} pulsos. Estado actual Q0..Q7 = ${lastReg.join("")}`}
           >
             {Array.from({ length: numColumns + 1 }, (_, i) => (
               <line

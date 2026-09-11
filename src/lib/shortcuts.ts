@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { useRegisterStore } from "../store/registerStore";
-import { pulseWithSound } from "./clock";
+import { cycleModeWithSound, pulseWithSound } from "./clock";
+import type { Bit } from "../types/register";
+
+const DIP_KEYS: Record<string, number> = { "1": 0, "2": 1, "3": 2, "4": 3 };
 
 export function useShortcuts() {
   useEffect(() => {
@@ -11,6 +14,14 @@ export function useShortcuts() {
       }
 
       const s = useRegisterStore.getState();
+      if (e.key in DIP_KEYS) {
+        const index = DIP_KEYS[e.key];
+        const current = s.dip[index];
+        const flipped: Bit = current === 1 ? 0 : 1;
+        s.setDip(index, flipped);
+        return;
+      }
+
       switch (e.key) {
         case " ":
           e.preventDefault();
@@ -20,11 +31,9 @@ export function useShortcuts() {
         case "C":
           s.clear();
           break;
-        case "0":
-          s.setData(0);
-          break;
-        case "1":
-          s.setData(1);
+        case "m":
+        case "M":
+          cycleModeWithSound();
           break;
         case "p":
         case "P":

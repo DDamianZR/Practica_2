@@ -1,38 +1,53 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
+import { useShallow } from "zustand/react/shallow";
 import { useRegisterStore } from "../store/registerStore";
-import { pulseWithSound } from "../lib/clock";
-import { ensureAudio } from "../lib/sound";
+import { cycleModeWithSound, pulseWithSound } from "../lib/clock";
+import { CLK_PIN, CLR_PIN, DIP_PINS, MODE_PIN } from "../lib/pinmap";
 
-function DipSwitch() {
-  const data = useRegisterStore((s) => s.data);
-  const setData = useRegisterStore((s) => s.setData);
+function DipToggle({ index, active }: { index: number; active: boolean }) {
+  const value = useRegisterStore((s) => s.dip[index]);
+  const setDip = useRegisterStore((s) => s.setDip);
 
   return (
-    <div className="flex flex-col items-center gap-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">DATA · D12</span>
+    <div className={clsx("flex flex-col items-center gap-1.5 transition-opacity duration-200", !active && "opacity-40")}>
+      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">D{index} · {DIP_PINS[index]}</span>
       <button
         type="button"
         role="switch"
-        aria-checked={data === 1}
-        aria-label={`Interruptor DATA, D12. Estado actual: ${data === 1 ? "encendido (1)" : "apagado (0)"}. Activar para cambiar.`}
-        onClick={() => setData(data === 1 ? 0 : 1)}
+        aria-checked={value === 1}
+        aria-label={`Interruptor DIP D${index}, pin ${DIP_PINS[index]}. Estado actual: ${value === 1 ? "encendido (1)" : "apagado (0)"}. Activar para cambiar.`}
+        onClick={() => setDip(index, value === 1 ? 0 : 1)}
         className={clsx(
           "relative h-8 w-14 rounded-full border transition-colors duration-200",
-          data === 1 ? "border-hi2/60 bg-hi2/10" : "border-line bg-panel2",
+          value === 1 ? "border-hi2/60 bg-hi2/10" : "border-line bg-panel2",
         )}
       >
         <motion.span
-          animate={{ x: data === 1 ? 24 : 2 }}
+          animate={{ x: value === 1 ? 24 : 2 }}
           transition={{ type: "spring", stiffness: 500, damping: 32 }}
           className={clsx(
             "absolute top-1 h-6 w-6 rounded-full",
-            data === 1 ? "bg-hi2 shadow-glow" : "bg-lo",
+            value === 1 ? "bg-hi2 shadow-glow" : "bg-lo",
           )}
         />
       </button>
-      <span className="font-mono text-xs font-bold text-text">{data}</span>
+      <span className="font-mono text-xs font-bold text-text">{value}</span>
+    </div>
+  );
+}
+
+function DipBank() {
+  const mode = useRegisterStore((s) => s.mode);
+
+  return (
+    <div className="flex flex-col items-start gap-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">DIP (D0..D3)</span>
+      <div className="flex items-end gap-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <DipToggle key={i} index={i} active={mode !== "SIPO" || i === 0} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -42,7 +57,7 @@ function ClkButton() {
 
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">CLK · D10</span>
+      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">CLK · {CLK_PIN}</span>
       <motion.button
         type="button"
         aria-label="Disparar pulso de reloj (CLK)"
@@ -71,7 +86,7 @@ function ClrButton() {
 
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">CLR · D11</span>
+      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">CLR · {CLR_PIN}</span>
       <motion.button
         type="button"
         aria-label="Limpiar registro (CLR)"
@@ -80,6 +95,23 @@ function ClrButton() {
         className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-danger bg-transparent text-danger transition-shadow duration-200 hover:shadow-glowDanger"
       >
         <span className="font-mono text-[11px] font-bold tracking-wide">CLR</span>
+      </motion.button>
+    </div>
+  );
+}
+
+function ModeButton() {
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">MODE · {MODE_PIN}</span>
+      <motion.button
+        type="button"
+        aria-label="Cambiar de modo (SIPO → PISO → PIPO)"
+        onClick={() => cycleModeWithSound()}
+        whileTap={{ scale: 0.97 }}
+        className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-hi bg-transparent text-hi transition-shadow duration-200 hover:shadow-glowCyan"
+      >
+        <span className="font-mono text-[10px] font-bold tracking-wide">MODE</span>
       </motion.button>
     </div>
   );
@@ -102,28 +134,8 @@ function PauseIcon() {
   );
 }
 
-function SpeakerOnIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-      <path d="M4 9v6h4l5 4V5L8 9H4Z" />
-      <path d="M16.5 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-      <path d="M19 6a8 8 0 0 1 0 12" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function SpeakerOffIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-      <path d="M4 9v6h4l5 4V5L8 9H4Z" />
-      <path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function AutoRunControls() {
-  const running = useRegisterStore((s) => s.running);
-  const speedBpm = useRegisterStore((s) => s.speedBpm);
+  const [running, speedBpm] = useRegisterStore(useShallow((s) => [s.running, s.speedBpm]));
   const play = useRegisterStore((s) => s.play);
   const pause = useRegisterStore((s) => s.pause);
   const setSpeed = useRegisterStore((s) => s.setSpeed);
@@ -158,85 +170,14 @@ function AutoRunControls() {
   );
 }
 
-function SequenceLoader() {
-  const loadSequence = useRegisterStore((s) => s.loadSequence);
-  const [value, setValue] = useState("");
-  const isValid = /^[01]+$/.test(value);
-
-  const submit = () => {
-    if (!isValid) return;
-    loadSequence(value);
-    setValue("");
-  };
-
-  return (
-    <div className="flex flex-col items-start gap-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Secuencia</span>
-      <div className="flex items-center gap-2">
-        <input
-          type="text"
-          inputMode="numeric"
-          pattern="[01]+"
-          placeholder="10110001"
-          value={value}
-          onChange={(e) => setValue(e.target.value.trim())}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") submit();
-          }}
-          aria-label="Secuencia binaria a cargar"
-          className={clsx(
-            "w-28 rounded-lg border bg-panel2 px-2 py-1.5 font-mono text-xs text-text placeholder:text-muted/60",
-            value.length > 0 && !isValid ? "border-danger" : "border-line",
-          )}
-        />
-        <motion.button
-          type="button"
-          aria-label="Cargar secuencia"
-          onClick={submit}
-          disabled={!isValid}
-          whileTap={{ scale: 0.97 }}
-          className="rounded-lg border border-hi/60 bg-hi/10 px-3 py-1.5 font-mono text-xs font-semibold text-hi transition-shadow duration-200 hover:shadow-glowCyan disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none"
-        >
-          Cargar
-        </motion.button>
-      </div>
-    </div>
-  );
-}
-
-function SoundToggle() {
-  const soundOn = useRegisterStore((s) => s.soundOn);
-  const toggleSound = useRegisterStore((s) => s.toggleSound);
-
-  return (
-    <motion.button
-      type="button"
-      aria-label={soundOn ? "Silenciar sonido" : "Activar sonido"}
-      aria-pressed={soundOn}
-      onClick={() => {
-        if (!soundOn) void ensureAudio();
-        toggleSound();
-      }}
-      whileTap={{ scale: 0.97 }}
-      className="flex h-9 w-9 items-center justify-center self-end rounded-full border border-line bg-panel2 text-muted transition-shadow duration-200 hover:shadow-glowCyan hover:text-hi"
-    >
-      {soundOn ? <SpeakerOnIcon /> : <SpeakerOffIcon />}
-    </motion.button>
-  );
-}
-
 export function Controls() {
   return (
-    <header className="flex flex-wrap items-center gap-x-8 gap-y-4 rounded-2xl border border-line bg-panel p-4">
-      <h1 className="font-mono text-sm uppercase tracking-widest text-text">
-        SIPO <span className="text-muted">·</span> 8 bits
-      </h1>
-      <DipSwitch />
+    <div className="flex flex-wrap items-end gap-x-8 gap-y-4 rounded-2xl border border-line bg-panel p-4">
+      <DipBank />
       <ClkButton />
       <ClrButton />
+      <ModeButton />
       <AutoRunControls />
-      <SequenceLoader />
-      <SoundToggle />
-    </header>
+    </div>
   );
 }

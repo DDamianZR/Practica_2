@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Controls } from "./components/Controls";
 import { TruthTable } from "./components/TruthTable";
+import { TimingDiagram } from "./components/TimingDiagram";
 import { useAutoRun } from "./lib/clock";
 
 function Panel({ title, children }: { title: string; children?: ReactNode }) {
@@ -22,7 +23,9 @@ export default function App() {
       <main className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Panel title="Circuit Board" />
         <Panel title="Flip-Flop Chain" />
-        <Panel title="Timing Diagram" />
+        <Panel title="Timing Diagram">
+          <TimingDiagram />
+        </Panel>
         <Panel title="Truth Table">
           <TruthTable />
         </Panel>

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
 import { useRegisterStore } from "../store/registerStore";
+import { pulseWithSound } from "../lib/clock";
+import { ensureAudio } from "../lib/sound";
 
 function DipSwitch() {
   const data = useRegisterStore((s) => s.data);
@@ -37,7 +39,6 @@ function DipSwitch() {
 
 function ClkButton() {
   const cycle = useRegisterStore((s) => s.cycle);
-  const pulseClock = useRegisterStore((s) => s.pulseClock);
 
   return (
     <div className="flex flex-col items-center gap-1.5">
@@ -45,7 +46,7 @@ function ClkButton() {
       <motion.button
         type="button"
         aria-label="Disparar pulso de reloj (CLK)"
-        onClick={() => pulseClock()}
+        onClick={() => pulseWithSound()}
         whileTap={{ scale: 0.97 }}
         className="relative flex h-14 w-14 items-center justify-center rounded-full border-2 border-warn bg-panel2 text-warn shadow-none transition-shadow duration-200 hover:shadow-glowWarn"
       >
@@ -212,7 +213,10 @@ function SoundToggle() {
       type="button"
       aria-label={soundOn ? "Silenciar sonido" : "Activar sonido"}
       aria-pressed={soundOn}
-      onClick={() => toggleSound()}
+      onClick={() => {
+        if (!soundOn) void ensureAudio();
+        toggleSound();
+      }}
       whileTap={{ scale: 0.97 }}
       className="flex h-9 w-9 items-center justify-center self-end rounded-full border border-line bg-panel2 text-muted transition-shadow duration-200 hover:shadow-glowCyan hover:text-hi"
     >

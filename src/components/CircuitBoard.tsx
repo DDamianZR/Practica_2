@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useShallow } from "zustand/react/shallow";
 import clsx from "clsx";
 import { useRegisterStore } from "../store/registerStore";
+import { pulseWithSound } from "../lib/clock";
 
 const LED_X = (i: number) => 92 + i * 62;
 const LED_Y = 40;
@@ -69,8 +70,8 @@ function PinLabel({ x, y, label }: { x: number; y: number; label: string }) {
 }
 
 export function CircuitBoard() {
-  const [reg, data, cycle, pulseClock, clear, setData] = useRegisterStore(
-    useShallow((s) => [s.reg, s.data, s.cycle, s.pulseClock, s.clear, s.setData]),
+  const [reg, data, cycle, clear, setData] = useRegisterStore(
+    useShallow((s) => [s.reg, s.data, s.cycle, s.clear, s.setData]),
   );
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -199,11 +200,11 @@ export function CircuitBoard() {
           role="button"
           tabIndex={0}
           aria-label="Disparar pulso de reloj (CLK), Arduino D10"
-          onClick={() => pulseClock()}
+          onClick={() => pulseWithSound()}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              pulseClock();
+              pulseWithSound();
             }
           }}
           onMouseEnter={() => setHovered("CLK · D10")}

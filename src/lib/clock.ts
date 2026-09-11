@@ -1,5 +1,14 @@
 import { useEffect } from "react";
 import { useRegisterStore } from "../store/registerStore";
+import { ensureAudio, tick } from "./sound";
+
+export function pulseWithSound(): void {
+  const s = useRegisterStore.getState();
+  s.pulseClock();
+  if (s.soundOn) {
+    void ensureAudio().then(tick);
+  }
+}
 
 export function useAutoRun() {
   const running = useRegisterStore((s) => s.running);
@@ -11,11 +20,11 @@ export function useAutoRun() {
     const periodMs = 60000 / speedBpm;
     let id: ReturnType<typeof setTimeout>;
 
-    const tick = () => {
-      useRegisterStore.getState().pulseClock();
-      id = setTimeout(tick, periodMs);
+    const loop = () => {
+      pulseWithSound();
+      id = setTimeout(loop, periodMs);
     };
-    id = setTimeout(tick, periodMs);
+    id = setTimeout(loop, periodMs);
 
     return () => clearTimeout(id);
   }, [running, speedBpm]);

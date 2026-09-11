@@ -5,6 +5,7 @@ import { TimingDiagram } from "./components/TimingDiagram";
 import { FlipFlopChain } from "./components/FlipFlopChain";
 import { CircuitBoard } from "./components/CircuitBoard";
 import { useAutoRun } from "./lib/clock";
+import { useShortcuts } from "./lib/shortcuts";
 
 function Panel({ title, children }: { title: string; children?: ReactNode }) {
   return (
@@ -17,6 +18,7 @@ function Panel({ title, children }: { title: string; children?: ReactNode }) {
 
 export default function App() {
   useAutoRun();
+  useShortcuts();
 
   return (
     <div className="flex min-h-full flex-col gap-4 p-4">
